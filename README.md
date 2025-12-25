@@ -1,15 +1,31 @@
 # @auralogiclabs/client-uuid-gen
 
+[![npm version](https://img.shields.io/npm/v/@auralogiclabs/client-uuid-gen.svg?style=flat-square)](https://www.npmjs.com/package/@auralogiclabs/client-uuid-gen)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![minzipped size](https://img.shields.io/bundlephobia/minzip/@auralogiclabs/client-uuid-gen?style=flat-square)](https://bundlephobia.com/package/@auralogiclabs/client-uuid-gen)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg?style=flat-square)](https://www.typescriptlang.org/)
+
 A robust, browser-based device UUID generator that creates unique fingerprints using multiple browser attributes including Canvas, WebGL, AudioContext, and LocalStorage estimates.
 
-## Features
+## Key Benefits
 
-- **Multi-factor Fingerprinting:** Combines User Agent, Screen properties, Timezone, Canvas rendering, WebGL capabilities, Audio processing, and Storage estimates.
-- **Privacy-Aware:** Generates a hash of the components, not storing raw PII (Personally Identifiable Information) by default.
-- **Configurable Hashing:** Supports **MD5** (default) and **SHA-256**.
-- **Incognito Support (Stable Mode):** Smartly handles incognito/private windows to keep the fingerprint consistent (enabled by default).
-- **Written in TypeScript:** Fully typed options and responses.
-- **Universal Support:** Works in Node.js (with fallbacks), Modern Browsers (ESM), and Legacy Environments (UMD/IIFE).
+| Feature                | Description                                                                                        |
+| :--------------------- | :------------------------------------------------------------------------------------------------- |
+| 🛡️ **Privacy-First**   | Generates a hash, never stores raw PII. Cookies are NOT used.                                      |
+| 🕵️‍♂️ **Incognito-Proof** | **Stable Mode** (default) ensures the same Device ID is generated in Normal and Incognito windows. |
+| 🚀 **High Entropy**    | Combines 8+ hardware/software signals (Canvas, WebGL, Audio, Storage, etc.) for high uniqueness.   |
+| 📦 **Universal**       | Works everywhere: Browser (ESM/IIFE), Node.js, and Bundlers (Webpack/Vite).                        |
+| 💎 **TypeScript**      | Written in TypeScript with full type definitions included.                                         |
+
+## Browser Support
+
+| Browser           | Version | Status       |
+| :---------------- | :------ | :----------- |
+| **Chrome**        | 60+     | ✅ Supported |
+| **Firefox**       | 60+     | ✅ Supported |
+| **Safari**        | 12+     | ✅ Supported |
+| **Edge**          | 79+     | ✅ Supported |
+| **iOS / Android** | Modern  | ✅ Supported |
 
 ## Installation
 
