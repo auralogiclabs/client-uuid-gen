@@ -2,13 +2,20 @@
   "name": "@auralogiclabs/client-uuid-gen",
   "version": "1.0.0",
   "description": "A robust device UUID generator with enhanced fingerprinting parameters.",
-  "main": "index.js",
-  "type": "commonjs",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsup src/index.ts --format cjs,esm,iife --dts --clean --global-name ClientUUIDGen",
+    "test": "vitest run",
+    "lint": "eslint src/**",
+    "format": "prettier --write src/**"
   },
   "keywords": [
     "uuid",
@@ -21,5 +28,18 @@
   "license": "MIT",
   "dependencies": {
     "crypto-js": "^4.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/crypto-js": "^4.2.0",
+    "@types/node": "^20.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "happy-dom": "^20.0.11",
+    "prettier": "^3.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^1.0.0"
   }
 }
