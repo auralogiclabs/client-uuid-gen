@@ -26,6 +26,14 @@
   ],
   "author": "Amartya Mondal <amartya@auralogiclabs.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/auralogiclabs/client-uuid-gen.git"
+  },
+  "bugs": {
+    "url": "https://github.com/auralogiclabs/client-uuid-gen/issues"
+  },
+  "homepage": "https://github.com/auralogiclabs/client-uuid-gen#readme",
   "dependencies": {
     "crypto-js": "^4.2.0"
   },
