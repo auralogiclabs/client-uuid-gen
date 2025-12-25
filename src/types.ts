@@ -32,3 +32,12 @@ export interface StorageFingerprint {
   usageRatio: string;
   usageBucket: string;
 }
+
+export interface ExtendedNavigator extends Navigator {
+  userLanguage?: string;
+  deviceMemory?: number;
+}
+
+export interface ExtendedWindow extends Window {
+  webkitOfflineAudioContext?: typeof OfflineAudioContext;
+}

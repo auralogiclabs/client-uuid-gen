@@ -9,17 +9,10 @@ import {
   FingerprintOptions,
   StorageFingerprint,
   WebGLFingerprint,
+  ExtendedNavigator,
+  ExtendedWindow,
 } from './types.js';
 import { getBrowser, getDeviceType, getOS } from './utils.js';
-
-interface ExtendedNavigator extends Navigator {
-  userLanguage?: string;
-  deviceMemory?: number;
-}
-
-interface ExtendedWindow extends Window {
-  webkitOfflineAudioContext?: typeof OfflineAudioContext;
-}
 
 export class EnhancedDeviceFingerprint {
   public components: Partial<FingerprintComponents> = {};
