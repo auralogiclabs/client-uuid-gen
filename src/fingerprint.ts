@@ -52,7 +52,10 @@ export class EnhancedDeviceFingerprint {
     };
   }
 
-  getCanvasFingerprint(): string {
+  getCanvasFingerprint(isStable = false): string {
+    // Stable mode: Skip canvas fingerprinting as browsers inject noise in incognito
+    if (isStable) return 'canvas-omitted-for-stability';
+
     if (typeof document === 'undefined') return 'canvas-unavailable';
     try {
       const canvas = document.createElement('canvas');
@@ -80,7 +83,10 @@ export class EnhancedDeviceFingerprint {
     }
   }
 
-  getWebGLFingerprint(): string {
+  getWebGLFingerprint(isStable = false): string {
+    // Stable mode: Skip WebGL fingerprinting as browsers (e.g. Safari) inject noise/masking
+    if (isStable) return 'webgl-omitted-for-stability';
+
     if (typeof document === 'undefined') return 'webgl-unavailable';
     try {
       const canvas = document.createElement('canvas');
@@ -209,8 +215,8 @@ export class EnhancedDeviceFingerprint {
     try {
       const basic = this.getBasicFingerprint(enableStableFingerprinting);
       const [canvas, webgl, audio, storage] = await Promise.all([
-        Promise.resolve(this.getCanvasFingerprint()),
-        Promise.resolve(this.getWebGLFingerprint()),
+        Promise.resolve(this.getCanvasFingerprint(enableStableFingerprinting)),
+        Promise.resolve(this.getWebGLFingerprint(enableStableFingerprinting)),
         this.getAudioFingerprint(enableStableFingerprinting),
         this.getStorageFingerprint(),
       ]);
