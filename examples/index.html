@@ -2,7 +2,7 @@
   Client UUID Generation
   (c) Auralogic Labs, 2025
 -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -10,8 +10,9 @@
     <title>Client UUID Gen - Sample</title>
     <style>
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+          'Open Sans', 'Helvetica Neue', sans-serif;
         padding: 20px;
         max-width: 800px;
         margin: 0 auto;
@@ -63,9 +64,8 @@
   <body>
     <h1>Device Fingerprint Demo</h1>
     <div id="dependency-warning" class="error">
-      <strong>Warning:</strong> <code>crypto-js</code> library not found.
-      Falling back to simple (short) hash. <br />Please ensure you are connected
-      to the internet to load the CDN.
+      <strong>Warning:</strong> <code>crypto-js</code> library not found. Falling back to simple
+      (short) hash. <br />Please ensure you are connected to the internet to load the CDN.
     </div>
 
     <p>
@@ -75,9 +75,7 @@
 
     <div class="card">
       <h2>Generated UUIDs</h2>
-      <div id="uuid-result" class="loading">
-        Click the button below to generate...
-      </div>
+      <div id="uuid-result" class="loading">Click the button below to generate...</div>
       <br />
       <button id="gen-btn">Generate Fingerprint</button>
     </div>
@@ -91,28 +89,27 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
     <!-- Import the library directly -->
-    <script src="../index.js"></script>
+    <script src="../dist/index.global.js"></script>
 
     <script>
-      const btn = document.getElementById("gen-btn");
-      const uuidResult = document.getElementById("uuid-result");
-      const componentsResult = document.getElementById("components-result");
-      const warningDiv = document.getElementById("dependency-warning");
+      const btn = document.getElementById('gen-btn');
+      const uuidResult = document.getElementById('uuid-result');
+      const componentsResult = document.getElementById('components-result');
+      const warningDiv = document.getElementById('dependency-warning');
 
       // Check if CryptoJS loaded
       if (!window.CryptoJS) {
-        warningDiv.style.display = "block";
+        warningDiv.style.display = 'block';
       }
 
-      btn.addEventListener("click", async () => {
-        uuidResult.textContent = "Generating...";
-        uuidResult.className = "loading";
-        componentsResult.textContent = "Processing...";
+      btn.addEventListener('click', async () => {
+        uuidResult.textContent = 'Generating...';
+        uuidResult.className = 'loading';
+        componentsResult.textContent = 'Processing...';
 
         try {
           // Access via the global window object we exposed
-          const { getFingerprint, EnhancedDeviceFingerprint } =
-            window.ClientUUIDGen;
+          const { getFingerprint, EnhancedDeviceFingerprint } = window.ClientUUIDGen;
 
           const startTime = performance.now();
 
@@ -120,7 +117,7 @@
           const md5Uuid = await getFingerprint();
 
           // Method 2: SHA-256
-          const sha256Uuid = await getFingerprint({ algo: "sha256" });
+          const sha256Uuid = await getFingerprint({ algo: 'sha256' });
 
           const endTime = performance.now();
 
@@ -128,25 +125,19 @@
                     <strong>MD5 (Default):</strong> <br> ${md5Uuid} <br><br>
                     <strong>SHA-256:</strong> <br> ${sha256Uuid}
                 `;
-          uuidResult.className = "";
+          uuidResult.className = '';
 
           // Method 2: Get components for demo purposes
           const fingerprinter = new EnhancedDeviceFingerprint();
           await fingerprinter.generateFingerprint(); // Populates internal state
 
-          componentsResult.textContent = JSON.stringify(
-            fingerprinter.components,
-            null,
-            2
-          );
+          componentsResult.textContent = JSON.stringify(fingerprinter.components, null, 2);
 
-          console.log(
-            `Fingerprint generated in ${(endTime - startTime).toFixed(2)}ms`
-          );
+          console.log(`Fingerprint generated in ${(endTime - startTime).toFixed(2)}ms`);
         } catch (err) {
           console.error(err);
-          uuidResult.textContent = "Error: " + err.message;
-          componentsResult.textContent = "See console for details.";
+          uuidResult.textContent = 'Error: ' + err.message;
+          componentsResult.textContent = 'See console for details.';
         }
       });
     </script>
