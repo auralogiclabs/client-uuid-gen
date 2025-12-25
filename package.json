@@ -1,0 +1,22 @@
+{
+  "name": "@auralogiclabs/client-uuid-gen",
+  "version": "1.0.0",
+  "description": "A robust device UUID generator with enhanced fingerprinting parameters.",
+  "main": "index.js",
+  "type": "commonjs",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "uuid",
+    "device-fingerprint",
+    "unique-id",
+    "client-id",
+    "browser-fingerprint"
+  ],
+  "author": "Auralogic Labs <hello@auralogiclabs.com>",
+  "license": "MIT"
+}
