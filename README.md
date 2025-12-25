@@ -7,6 +7,7 @@ A robust, browser-based device UUID generator that creates unique fingerprints u
 - **Multi-factor Fingerprinting:** Combines User Agent, Screen properties, Timezone, Canvas rendering, WebGL capabilities, Audio processing, and Storage estimates.
 - **Privacy-Aware:** Generates a hash of the components, not storing raw PII (Personally Identifiable Information) by default.
 - **Configurable Hashing:** Supports **MD5** (default) and **SHA-256**.
+- **Incognito Support (Stable Mode):** Smartly handles incognito/private windows to keep the fingerprint consistent (enabled by default).
 - **Written in TypeScript:** Fully typed options and responses.
 - **Universal Support:** Works in Node.js (with fallbacks), Modern Browsers (ESM), and Legacy Environments (UMD/IIFE).
 
@@ -25,9 +26,9 @@ import { getFingerprint } from '@auralogiclabs/client-uuid-gen';
 
 async function identifyDevice() {
   try {
-    // Default: MD5 hash (32 chars)
+    // Default: MD5 hash, Stable Mode enabled
     const deviceId = await getFingerprint();
-    console.log('Device UUID (MD5):', deviceId);
+    console.log('Device UUID (Stable):', deviceId);
 
     // Option: SHA-256 hash (64 chars)
     const deviceIdStrong = await getFingerprint({ algo: 'sha256' });
@@ -38,9 +39,34 @@ async function identifyDevice() {
 }
 ```
 
+### Stable Fingerprinting (Incognito Mode)
+
+Browsers often intentionally alter fingerprinting data in Incognito/Private windows to prevent tracking (e.g., hiding real screen height, adding noise to audio signals).
+
+**This library handles this automatically.**
+
+#### Configuration: `enableStableFingerprinting`
+
+- `true` (Default): Treats Normal and Incognito windows as the **SAME** user.
+  - _How?_ It neutralizes unstable components (e.g., ignores screen height, skips audio fingerprinting) to ensure the hash remains consistent.
+- `false`: Treats Normal and Incognito windows as **DIFFERENT** users.
+  - _How?_ It uses all available data, which means the noise injected by the browser will cause the hash to change.
+
+```typescript
+// Treat Incognito as a unique/different user (Strict Mode)
+const strictId = await getFingerprint({
+  enableStableFingerprinting: false,
+});
+
+// Treat Incognito as the same user (Stable Mode - Default)
+const stableId = await getFingerprint({
+  enableStableFingerprinting: true,
+});
+```
+
 ### Advanced Usage (Class Access)
 
-You can access the `EnhancedDeviceFingerprint` class directly to inspect individual components (canvas data, audio signals, etc.).
+You can access the `EnhancedDeviceFingerprint` class directly to inspect individual components.
 
 ```typescript
 import { EnhancedDeviceFingerprint } from '@auralogiclabs/client-uuid-gen';
@@ -56,10 +82,10 @@ async function fullAnalysis() {
   console.log('Detailed Components:', fingerprinter.components);
   /* Output example:
   {
-    basic: { userAgent: "...", screenResolution: "1920x1080", ... },
+    basic: { userAgent: "...", screenResolution: "1920x(Authored)", ... },
     canvas: "data:image/png;base64,...",
     webgl: "...",
-    audio: "...",
+    audio: "audio-omitted-for-stability",
     storage: "..."
   }
   */
@@ -157,6 +183,10 @@ npx serve .
 
 # 3. Visit http://localhost:3000/examples/
 ```
+
+|                            Example Output                            |
+| :------------------------------------------------------------------: |
+| <img src="assets/example.png" width="800" alt="Example Interface" /> |
 
 ## License
 

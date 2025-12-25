@@ -17,7 +17,7 @@ import { getBrowser, getDeviceType, getOS } from './utils.js';
 export class EnhancedDeviceFingerprint {
   public components: Partial<FingerprintComponents> = {};
 
-  getBasicFingerprint(): Record<string, unknown> {
+  getBasicFingerprint(isStable = false): Record<string, unknown> {
     if (
       typeof navigator === 'undefined' ||
       typeof window === 'undefined' ||
@@ -27,6 +27,9 @@ export class EnhancedDeviceFingerprint {
     }
 
     const nav = navigator as ExtendedNavigator;
+
+    // Stable mode: Use width only, as height often varies in incognito due to taskbar masking
+    const screenRes = isStable ? `${screen.width}x(Authored)` : `${screen.width}x${screen.height}`;
 
     return {
       userAgent: navigator.userAgent,
@@ -38,7 +41,7 @@ export class EnhancedDeviceFingerprint {
       platform: navigator.platform || '',
       hardwareConcurrency: navigator.hardwareConcurrency || 0,
       deviceMemory: nav.deviceMemory || 0,
-      screenResolution: `${screen.width}x${screen.height}`,
+      screenResolution: screenRes,
       screenColorDepth: screen.colorDepth,
       screenPixelDepth: screen.pixelDepth || screen.colorDepth,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
@@ -49,7 +52,10 @@ export class EnhancedDeviceFingerprint {
     };
   }
 
-  getCanvasFingerprint(): string {
+  getCanvasFingerprint(isStable = false): string {
+    // Stable mode: Skip canvas fingerprinting as browsers inject noise in incognito
+    if (isStable) return 'canvas-omitted-for-stability';
+
     if (typeof document === 'undefined') return 'canvas-unavailable';
     try {
       const canvas = document.createElement('canvas');
@@ -77,7 +83,10 @@ export class EnhancedDeviceFingerprint {
     }
   }
 
-  getWebGLFingerprint(): string {
+  getWebGLFingerprint(isStable = false): string {
+    // Stable mode: Skip WebGL fingerprinting as browsers (e.g. Safari) inject noise/masking
+    if (isStable) return 'webgl-omitted-for-stability';
+
     if (typeof document === 'undefined') return 'webgl-unavailable';
     try {
       const canvas = document.createElement('canvas');
@@ -114,7 +123,10 @@ export class EnhancedDeviceFingerprint {
     }
   }
 
-  async getAudioFingerprint(): Promise<string> {
+  async getAudioFingerprint(isStable = false): Promise<string> {
+    // Stable mode: Skip audio fingerprinting as it has noise in incognito
+    if (isStable) return 'audio-omitted-for-stability';
+
     if (typeof window === 'undefined') return 'audio-unsupported';
     try {
       const win = window as ExtendedWindow;
@@ -197,13 +209,15 @@ export class EnhancedDeviceFingerprint {
     return CryptoJS.MD5(str).toString(CryptoJS.enc.Hex);
   }
 
-  async generateFingerprint(options: FingerprintOptions = { algo: 'md5' }): Promise<string> {
+  async generateFingerprint(options: FingerprintOptions = {}): Promise<string> {
+    const { algo = 'md5', enableStableFingerprinting = true } = options;
+
     try {
-      const basic = this.getBasicFingerprint();
+      const basic = this.getBasicFingerprint(enableStableFingerprinting);
       const [canvas, webgl, audio, storage] = await Promise.all([
-        Promise.resolve(this.getCanvasFingerprint()),
-        Promise.resolve(this.getWebGLFingerprint()),
-        this.getAudioFingerprint(),
+        Promise.resolve(this.getCanvasFingerprint(enableStableFingerprinting)),
+        Promise.resolve(this.getWebGLFingerprint(enableStableFingerprinting)),
+        this.getAudioFingerprint(enableStableFingerprinting),
         this.getStorageFingerprint(),
       ]);
 
@@ -211,23 +225,24 @@ export class EnhancedDeviceFingerprint {
       this.components = components;
 
       const combined = JSON.stringify(components);
-      return this.hashString(combined, options.algo);
+      return this.hashString(combined, algo);
     } catch (e) {
       console.error('Fingerprint generation failed:', e);
       const minimal = { userAgent: navigator ? navigator.userAgent : 'unknown' };
-      return this.hashString(JSON.stringify(minimal), options.algo);
+      return this.hashString(JSON.stringify(minimal), algo);
     }
   }
 
-  async get(options: FingerprintOptions = { algo: 'md5' }): Promise<string> {
+  async get(options: FingerprintOptions = {}): Promise<string> {
     if (typeof navigator === 'undefined' || typeof screen === 'undefined') {
       return 'non-browser-env';
     }
+    const { algo = 'md5' } = options;
     try {
       return await this.generateFingerprint(options);
     } catch (e) {
       console.error('Failed to get device UUID:', e);
-      return this.hashString(`${navigator.userAgent}${screen.width}${screen.height}`, options.algo);
+      return this.hashString(`${navigator.userAgent}${screen.width}${screen.height}`, algo);
     }
   }
 }
