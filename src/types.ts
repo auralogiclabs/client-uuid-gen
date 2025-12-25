@@ -15,6 +15,7 @@ export type HashingAlgorithm = 'md5' | 'sha256';
 
 export interface FingerprintOptions {
   algo?: HashingAlgorithm;
+  enableStableFingerprinting?: boolean;
 }
 
 export interface WebGLFingerprint {
