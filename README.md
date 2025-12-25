@@ -184,6 +184,10 @@ npx serve .
 # 3. Visit http://localhost:3000/examples/
 ```
 
+|                            Example Output                            |
+| :------------------------------------------------------------------: |
+| <img src="assets/example.png" width="800" alt="Example Interface" /> |
+
 ## License
 
 MIT © [Auralogic Labs](https://auralogiclabs.com)
