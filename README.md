@@ -21,15 +21,21 @@ npm install @auralogiclabs/client-uuid-gen
 
 Import the `getFingerprint` function to get a unique hash string for the current browser/device.
 
+By default, it uses **MD5**. You can specify `sha256` for a longer hash.
+
 ```javascript
 import { getFingerprint } from "@auralogiclabs/client-uuid-gen";
 
 // Async function needed
 async function identifyDevice() {
   try {
+    // Default: MD5 hash (32 chars)
     const deviceId = await getFingerprint();
-    console.log("Device UUID:", deviceId);
-    // Use deviceId for analytics, licensing, fraud detection, etc.
+    console.log("Device UUID (MD5):", deviceId);
+
+    // Option: SHA-256 hash (64 chars)
+    const deviceIdStrong = await getFingerprint({ algo: "sha256" });
+    console.log("Device UUID (SHA-256):", deviceIdStrong);
   } catch (error) {
     console.error("Failed to generate fingerprint:", error);
   }
@@ -83,6 +89,28 @@ All these components are combined into a JSON string and hashed to produce a sho
 
 - **Browser Only:** This library relies on browser APIs (`window`, `navigator`, `document`, `screen`). It will not work in a Node.js server environment (and will safely return a fallback or error if executed there).
 - **Privacy:** Fingerprinting can be used for tracking. Ensure you comply with GDPR, CCPA, and other privacy regulations when using this for user identification. obtain necessary consents if required.
+
+## Running the Example
+
+We have provided a sample HTML file to demonstrate the library in action.
+
+1.  Navigate to the `examples` folder.
+2.  Open `index.html` in your browser.
+
+    - **Note:** Some browsers restrict certain APIs (like `crypto` or `AudioContext`) when opening files directly via `file://`. For the best experience, use a local development server.
+    - Example with Python:
+      ```bash
+      # From the project root
+      python3 -m http.server
+      # Then visit http://localhost:8000/examples/
+      ```
+    - Example with Node `serve`:
+      ```bash
+      npx serve .
+      # Then visit the URL provided
+      ```
+
+3.  Click "Generate Fingerprint" to see the UUID and detailed component breakdown.
 
 ## License
 

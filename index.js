@@ -3,6 +3,20 @@
  * Generates a unique device ID based on browser attributes, canvas, WebGL, audio, and storage.
  */
 
+// Try to import crypto-js if we are in a CommonJS environment
+let CryptoJS;
+if (typeof require !== "undefined") {
+  try {
+    CryptoJS = require("crypto-js");
+  } catch (e) {
+    // crypto-js not found via require
+  }
+}
+// In browser without require, hope it's on window.CryptoJS
+if (!CryptoJS && typeof window !== "undefined" && window.CryptoJS) {
+  CryptoJS = window.CryptoJS;
+}
+
 class EnhancedDeviceFingerprint {
   constructor() {
     this.components = {};
@@ -239,7 +253,20 @@ class EnhancedDeviceFingerprint {
   }
 
   // ---------- Hash ----------
-  hashString(str) {
+  hashString(str, algo = "md5") {
+    if (!CryptoJS) {
+      console.warn("CryptoJS not found. Falling back to simple custom hash.");
+      return this.simpleHash(str);
+    }
+
+    if (algo === "sha256") {
+      return CryptoJS.SHA256(str).toString(CryptoJS.enc.Hex);
+    }
+    // Default to MD5
+    return CryptoJS.MD5(str).toString(CryptoJS.enc.Hex);
+  }
+
+  simpleHash(str) {
     let h1 = 0xdeadbeef;
     let h2 = 0x41c6ce57;
 
@@ -262,10 +289,8 @@ class EnhancedDeviceFingerprint {
     return (4294967296 * (2097151 & h2) + h1).toString(36);
   }
 
-  async generateFingerprint() {
+  async generateFingerprint(options = { algo: "md5" }) {
     try {
-      // console.log("Generating enhanced device fingerprint...");
-
       const basic = this.getBasicFingerprint();
       const [canvas, webgl, audio, storage] = await Promise.all([
         Promise.resolve(this.getCanvasFingerprint()),
@@ -277,28 +302,30 @@ class EnhancedDeviceFingerprint {
       this.components = { basic, canvas, webgl, audio, storage };
 
       const combined = JSON.stringify(this.components);
-      const hash = this.hashString(combined);
+      const hash = this.hashString(combined, options.algo);
 
-      // console.log("Fingerprint generated:", hash);
       return hash;
     } catch (e) {
       console.error("Fingerprint generation failed:", e);
-      const basic = this.getBasicFingerprint();
-      return this.hashString(JSON.stringify(basic));
+      // Fallback: minimal valid fingerprint
+      const minimal = {
+        userAgent: navigator ? navigator.userAgent : "unknown",
+      };
+      return this.hashString(JSON.stringify(minimal), options.algo);
     }
   }
 
-  async get() {
+  async get(options = { algo: "md5" }) {
     if (typeof navigator === "undefined" || typeof screen === "undefined") {
-      // Fallback for non-browser environments if called inadvertently
       return "non-browser-env";
     }
     try {
-      return await this.generateFingerprint();
+      return await this.generateFingerprint(options);
     } catch (e) {
       console.error("Failed to get device UUID:", e);
       return this.hashString(
-        `${navigator.userAgent}${screen.width}${screen.height}`
+        `${navigator.userAgent}${screen.width}${screen.height}`,
+        options.algo
       );
     }
   }
@@ -307,7 +334,16 @@ class EnhancedDeviceFingerprint {
 // Export the class and a simple instance wrapper
 const fingerprinter = new EnhancedDeviceFingerprint();
 
-module.exports = {
-  EnhancedDeviceFingerprint,
-  getFingerprint: () => fingerprinter.get(),
-};
+// Export for CommonJS (Node/Bundlers) and Browser
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    EnhancedDeviceFingerprint,
+    getFingerprint: (options) => fingerprinter.get(options),
+  };
+} else {
+  // Browser global
+  window.ClientUUIDGen = {
+    EnhancedDeviceFingerprint,
+    getFingerprint: (options) => fingerprinter.get(options),
+  };
+}

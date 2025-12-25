@@ -18,5 +18,8 @@
     "browser-fingerprint"
   ],
   "author": "Auralogic Labs <hello@auralogiclabs.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "crypto-js": "^4.2.0"
+  }
 }
