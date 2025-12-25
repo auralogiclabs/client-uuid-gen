@@ -1,4 +1,9 @@
 /**
+ * Client UUID Generation
+ * (c) Auralogic Labs, 2025
+ */
+
+/**
  * Enhanced Device Fingerprinting Library
  * Generates a unique device ID based on browser attributes, canvas, WebGL, audio, and storage.
  */

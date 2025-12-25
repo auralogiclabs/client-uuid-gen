@@ -17,7 +17,7 @@
     "client-id",
     "browser-fingerprint"
   ],
-  "author": "Auralogic Labs <hello@auralogiclabs.com>",
+  "author": "Amartya Mondal <amartya@auralogiclabs.com>",
   "license": "MIT",
   "dependencies": {
     "crypto-js": "^4.2.0"
