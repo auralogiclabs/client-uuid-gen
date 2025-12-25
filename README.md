@@ -6,8 +6,9 @@ A robust, browser-based device UUID generator that creates unique fingerprints u
 
 - **Multi-factor Fingerprinting:** Combines User Agent, Screen properties, Timezone, Canvas rendering, WebGL capabilities, Audio processing, and Storage estimates.
 - **Privacy-Aware:** Generates a hash of the components, not storing raw PII (Personally Identifiable Information) by default.
-- **Promise-Based:** Fully async API to handle components like AudioContext rendering.
-- **Zero External Dependencies:** Lightweight and easy to bundle.
+- **Configurable Hashing:** Supports **MD5** (default) and **SHA-256**.
+- **Written in TypeScript:** Fully typed options and responses.
+- **Universal Support:** Works in Node.js (with fallbacks), Modern Browsers (ESM), and Legacy Environments (UMD/IIFE).
 
 ## Installation
 
@@ -17,60 +18,72 @@ npm install @auralogiclabs/client-uuid-gen
 
 ## Usage
 
-### Basic Usage
+### Basic Usage (ES Modules / TypeScript)
 
-Import the `getFingerprint` function to get a unique hash string for the current browser/device.
+```typescript
+import { getFingerprint } from '@auralogiclabs/client-uuid-gen';
 
-By default, it uses **MD5**. You can specify `sha256` for a longer hash.
-
-```javascript
-import { getFingerprint } from "@auralogiclabs/client-uuid-gen";
-
-// Async function needed
 async function identifyDevice() {
   try {
     // Default: MD5 hash (32 chars)
     const deviceId = await getFingerprint();
-    console.log("Device UUID (MD5):", deviceId);
+    console.log('Device UUID (MD5):', deviceId);
 
     // Option: SHA-256 hash (64 chars)
-    const deviceIdStrong = await getFingerprint({ algo: "sha256" });
-    console.log("Device UUID (SHA-256):", deviceIdStrong);
+    const deviceIdStrong = await getFingerprint({ algo: 'sha256' });
+    console.log('Device UUID (SHA-256):', deviceIdStrong);
   } catch (error) {
-    console.error("Failed to generate fingerprint:", error);
+    console.error('Failed to generate fingerprint:', error);
   }
 }
-
-identifyDevice();
 ```
 
 ### Advanced Usage (Class Access)
 
-If you need more control or want to access specific component data (e.g., just the basic fingerprints or fallback behavior), you can use the `EnhancedDeviceFingerprint` class directly.
+You can access the `EnhancedDeviceFingerprint` class directly to inspect individual components (canvas data, audio signals, etc.).
 
-```javascript
-import { EnhancedDeviceFingerprint } from "@auralogiclabs/client-uuid-gen";
+```typescript
+import { EnhancedDeviceFingerprint } from '@auralogiclabs/client-uuid-gen';
 
 async function fullAnalysis() {
   const fingerprinter = new EnhancedDeviceFingerprint();
 
-  // 1. Get entire fingerprint hash
+  // 1. Generate the hash
   const uuid = await fingerprinter.get();
-  console.log("UUID:", uuid);
+  console.log('UUID:', uuid);
 
-  // 2. Access internal components after generation
-  // Note: generateFingerprint() populates the .components object
-  await fingerprinter.generateFingerprint();
-  console.log("Detailed Components:", fingerprinter.components);
-  // Output example:
-  // {
-  //   basic: { userAgent: "...", screenResolution: "1920x1080", ... },
-  //   canvas: "data:image/png;base64, ...",
-  //   webgl: "...",
-  //   audio: "...",
-  //   storage: "..."
-  // }
+  // 2. Access internal components (populated after get/generateFingerprint)
+  console.log('Detailed Components:', fingerprinter.components);
+  /* Output example:
+  {
+    basic: { userAgent: "...", screenResolution: "1920x1080", ... },
+    canvas: "data:image/png;base64,...",
+    webgl: "...",
+    audio: "...",
+    storage: "..."
+  }
+  */
 }
+```
+
+### Browser Usage (Script Tag)
+
+For direct use in the browser without a bundler, use the global build.
+
+```html
+<!-- Load crypto-js dependency (standard hashing support) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+<!-- Load the library -->
+<script src="https://unpkg.com/@auralogiclabs/client-uuid-gen/dist/index.global.js"></script>
+
+<script>
+  const { getFingerprint } = window.ClientUUIDGen;
+
+  getFingerprint().then((uuid) => {
+    console.log('Generated UUID:', uuid);
+  });
+</script>
 ```
 
 ## How It Works
@@ -78,40 +91,73 @@ async function fullAnalysis() {
 This library generates a "fingerprint" by collecting stable characteristics of the user's browser environment:
 
 1.  **Basic Info:** User Agent, OS, Browser, Device Type, Language, Screen Resolution, Timezone.
-2.  **Canvas Fingerprinting:** Renders a hidden canvas with specific text and colors. Differences in graphics rendering hardware produce unique data URLs.
+2.  **Canvas Fingerprinting:** Renders a hidden canvas with specific text and colors. Differences in graphics hardware produce unique data URLs.
 3.  **WebGL Fingerprinting:** Queries WebGL vendor and renderer information.
 4.  **Audio Fingerprinting:** Uses an OfflineAudioContext to render a specific oscillator tone. Differences in audio hardware/drivers produce unique signal processing results.
 5.  **Storage Fingerprinting:** Estimates available storage quota to bucket users (e.g., "fast device with lots of space" vs "budget device").
 
 All these components are combined into a JSON string and hashed to produce a short, unique identifier.
 
-## Notes
+## Privacy Note
 
-- **Browser Only:** This library relies on browser APIs (`window`, `navigator`, `document`, `screen`). It will not work in a Node.js server environment (and will safely return a fallback or error if executed there).
-- **Privacy:** Fingerprinting can be used for tracking. Ensure you comply with GDPR, CCPA, and other privacy regulations when using this for user identification. obtain necessary consents if required.
+Fingerprinting allows identification without cookies. Ensure you comply with **GDPR**, **CCPA**, and other privacy regulations.
 
-## Running the Example
+- Inform users that device characteristics are being used for identification/fraud prevention.
+- Obtain necessary consents if required in your jurisdiction.
 
-We have provided a sample HTML file to demonstrate the library in action.
+## Development
 
-1.  Navigate to the `examples` folder.
-2.  Open `index.html` in your browser.
+### Prerequisites
 
-    - **Note:** Some browsers restrict certain APIs (like `crypto` or `AudioContext`) when opening files directly via `file://`. For the best experience, use a local development server.
-    - Example with Python:
-      ```bash
-      # From the project root
-      python3 -m http.server
-      # Then visit http://localhost:8000/examples/
-      ```
-    - Example with Node `serve`:
-      ```bash
-      npx serve .
-      # Then visit the URL provided
-      ```
+- Node.js 18+
 
-3.  Click "Generate Fingerprint" to see the UUID and detailed component breakdown.
+### Setup
+
+```bash
+git clone https://github.com/auralogiclabs/client-uuid-gen.git
+cd client-uuid-gen
+npm install
+```
+
+### Build
+
+Generates `dist/` folder with CJS, ESM, and IIFE formats.
+
+```bash
+npm run build
+```
+
+### Test
+
+Runs unit tests using Vitest.
+
+```bash
+npm test
+```
+
+### Lint & Format
+
+```bash
+npm run lint
+npm run format
+```
+
+### Running Example
+
+To run the example page locally:
+
+> **Important:** Run the server from the **project root**, not inside the `examples/` folder. This ensures the browser can correct access the `dist/` folder.
+
+```bash
+# 1. Build the library first
+npm run build
+
+# 2. Serve from project root
+npx serve .
+
+# 3. Visit http://localhost:3000/examples/
+```
 
 ## License
 
-MIT
+MIT © [Auralogic Labs](https://auralogiclabs.com)
